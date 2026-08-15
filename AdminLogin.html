@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?!= include('Styles'); ?>
+  </head>
+  <body data-page="admin-login">
+    <main class="auth-stage admin-stage">
+      <section class="auth-visual">
+        <a class="back-link light" target="_top" href="<?= appUrl(); ?>">Back to home</a>
+        <div class="brand jumbo">
+          <div class="brand-icon">SL</div>
+          <div>
+            <strong>StayLedger</strong>
+            <span>Admin command center</span>
+          </div>
+        </div>
+        <h1>Post bills, edit transactions, and keep rooms booked cleanly.</h1>
+        <p>Designed for fast monthly billing work across Malatabis and Feriols rooms.</p>
+        <div class="floating-stack">
+          <span>6 fixed rooms</span>
+          <span>Editable table</span>
+          <span>Live Sheets data</span>
+        </div>
+      </section>
+      <section class="auth-card elevated admin-card">
+        <p class="eyebrow">Admin Access</p>
+        <h2>Open dashboard</h2>
+        <p class="muted-line top">Enter the admin password to manage renters and billings.</p>
+        <form id="adminLoginForm" class="form-stack">
+          <label>Admin Password<input name="password" type="password" placeholder="Admin password" required></label>
+          <button class="button primary" type="submit">Launch Admin</button>
+        </form>
+      </section>
+    </main>
+    <div class="toast" id="toast"></div>
+    <script>const APP_URL = '<?= appUrl(); ?>';</script>
+    <?!= include('Client'); ?>
+  </body>
+</html>

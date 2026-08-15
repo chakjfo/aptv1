@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?!= include('Styles'); ?>
+  </head>
+  <body data-page="home">
+    <main class="site-shell">
+      <section class="hero-page">
+        <nav class="top-nav">
+          <div class="brand dark">
+            <div class="brand-icon">SL</div>
+            <div>
+              <strong>StayLedger</strong>
+              <span>Apartment billing</span>
+            </div>
+          </div>
+          <div class="nav-actions">
+            <a class="link-button ghost" target="_top" href="<?= appUrl(); ?>?page=user-login">User Login</a>
+            <a class="link-button primary" target="_top" href="<?= appUrl(); ?>?page=admin-login">Admin</a>
+          </div>
+        </nav>
+
+        <div class="hero-content">
+          <p class="eyebrow">Malatabis and Feriols</p>
+          <h1>Room billing, more control center.</h1>
+          <p class="hero-copy">
+            Six fixed rooms, monthly transactions, renter status, and bill histories, wrapped in a clean Apps Script dashboard.
+          </p>
+          <div class="hero-actions">
+            <a class="link-button primary large" target="_top" href="<?= appUrl(); ?>?page=user-login">Login as Renter</a>
+            <a class="link-button soft large" target="_top" href="<?= appUrl(); ?>?page=user-register">Create Renter Account</a>
+            <a class="link-button soft large" target="_top" href="<?= databaseUrl(); ?>">View Spreadsheet Database</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="mobile-home">
+        <div class="mobile-home-top">
+          <div class="brand dark">
+            <div class="brand-icon">SL</div>
+            <div>
+              <strong>StayLedger</strong>
+              <span>Apartment billing</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mobile-hero-copy">
+          <p class="eyebrow">Malatabis and Feriols</p>
+          <h1>Apartment bills</h1>
+          <p>
+            Fast access for renters and admin records.
+          </p>
+        </div>
+
+        <div class="mobile-mini-grid">
+          <div>
+            <span>6</span>
+            <strong>Rooms</strong>
+          </div>
+          <div>
+            <span>₱</span>
+            <strong>Bills</strong>
+          </div>
+          <div>
+            <span>24/7</span>
+            <strong>Records</strong>
+          </div>
+        </div>
+
+        <div class="mobile-action-stack">
+          <a class="mobile-action primary-action" target="_top" href="<?= appUrl(); ?>?page=user-login">
+            <span>Renter</span>
+            <strong>Login to dashboard</strong>
+          </a>
+          <a class="mobile-action secondary-action" target="_top" href="<?= appUrl(); ?>?page=user-register">
+            <span>New renter</span>
+            <strong>Create account</strong>
+          </a>
+          <a class="mobile-action admin-action" target="_top" href="<?= appUrl(); ?>?page=admin-login">
+            <span>Admin</span>
+            <strong>Open management</strong>
+          </a>
+          <a class="mobile-action database-action" target="_top" href="<?= databaseUrl(); ?>">
+            <span>Database</span>
+            <strong>View spreadsheet records</strong>
+          </a>
+        </div>
+      </section>
+      <div class="toast" id="toast"></div>
+    </main>
+    <script>const APP_URL = '<?= appUrl(); ?>';</script>
+    <?!= include('Client'); ?>
+  </body>
+</html>

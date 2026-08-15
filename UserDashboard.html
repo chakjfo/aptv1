@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?!= include('Styles'); ?>
+  </head>
+  <body data-page="user-dashboard">
+    <div class="dashboard-shell">
+      <aside class="rail">
+        <div class="brand">
+          <div class="brand-icon">SL</div>
+          <div><strong>StayLedger</strong><span>Renter</span></div>
+        </div>
+        <a class="rail-link active" target="_top" href="<?= appUrl(); ?>?page=user-dashboard">Dashboard</a>
+        <a class="rail-link" target="_top" href="<?= databaseUrl(); ?>">Spreadsheet</a>
+        <button class="rail-link" id="userLogout" type="button">Logout</button>
+      </aside>
+      <main class="workspace">
+        <header class="workspace-head">
+          <div>
+            <p class="eyebrow">Renter Dashboard</p>
+            <h1 id="userWelcome">Loading account</h1>
+          </div>
+          <div class="account-chips" id="userAccountChips"></div>
+        </header>
+
+        <section class="dashboard-grid renter-readonly-grid">
+          <section class="panel renter-profile-panel">
+            <div class="panel-head">
+              <div><p class="eyebrow">My Details</p><h2>Account summary</h2></div>
+            </div>
+            <div class="readonly-stack" id="userDetailsPanel"></div>
+          </section>
+
+          <section class="panel form-stack renter-actions-panel">
+            <div class="panel-head">
+              <div><p class="eyebrow">Contact</p><h2>Update phone</h2></div>
+            </div>
+            <form id="userPhoneForm" class="form-stack">
+              <label>Phone Number<input name="phone" id="userPhoneInput"></label>
+              <button class="button primary" type="submit">Save Phone</button>
+            </form>
+          </section>
+
+          <section class="panel form-stack renter-actions-panel">
+            <div class="panel-head">
+              <div><p class="eyebrow">Request</p><h2>Room change</h2></div>
+            </div>
+            <form id="roomRequestForm" class="form-stack">
+              <div class="two-col">
+                <label>Requested Place<select name="requestedPlace" id="requestPlace" required></select></label>
+                <label>Requested Room<select name="requestedRoom" id="requestRoom" required></select></label>
+              </div>
+              <label>Message<textarea name="message" rows="3" placeholder="Optional reason or preferred move date"></textarea></label>
+              <button class="button primary" type="submit">Send Request</button>
+            </form>
+          </section>
+
+          <section class="panel span-wide">
+            <div class="panel-head">
+              <div><p class="eyebrow">Billing Breakdown</p><h2>Monthly records</h2></div>
+            </div>
+            <div class="mobile-bill-list" id="userBillsCards"></div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Month</th><th>Date</th><th>Place</th><th>Room</th><th>Rent</th><th>Water</th><th>Electricity</th><th>Total</th><th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="userBillsTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>const APP_URL = '<?= appUrl(); ?>';</script>
+    <?!= include('Client'); ?>
+  </body>
+</html>
