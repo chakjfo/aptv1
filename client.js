@@ -217,6 +217,11 @@ const page = document.body.dataset.page;
     document.getElementById('userAccountChips').innerHTML = accountChips(user);
     document.getElementById('userDetailsPanel').innerHTML = renderUserDetails(user);
     document.getElementById('userPhoneInput').value = user.phone || '';
+    const sheetLink = document.getElementById('userSpreadsheetLink');
+    if (sheetLink) {
+      sheetLink.href = user.renterSheetUrl || '#';
+      sheetLink.classList.toggle('disabled', !user.renterSheetUrl);
+    }
     populatePlaceSelect(document.getElementById('requestPlace'), session.rooms || []);
     populateRoomSelect(document.getElementById('requestRoom'), document.getElementById('requestPlace').value, session.rooms || []);
     document.getElementById('requestPlace').onchange = () => {
@@ -537,6 +542,7 @@ const page = document.body.dataset.page;
     const details = [
       ['Full Name', user.fullName],
       ['Username', `@${user.username}`],
+      ['Email', user.email || 'Not provided'],
       ['Phone', user.phone || 'Not provided'],
       ['Account Status', user.accountStatus]
     ];

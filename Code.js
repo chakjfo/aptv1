@@ -3,7 +3,7 @@ const SPREADSHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID
 const ADMIN_PASSWORD = 'tatapulido1977';
 const DATABASE_EDITOR_EMAILS = [
   'charishpulido04@gmail.com',
-  'tatapulid1@gmail.com'
+  'tatapulido1@gmail.com'
 ];
 const BILLS_SHEET = 'Bills';
 const RENTERS_SHEET = 'Renters';
@@ -27,7 +27,10 @@ const RENTER_HEADERS = [
   'Rental Place',
   'Room Number',
   'Created At',
-  'Updated At'
+  'Updated At',
+  'Email',
+  'Renter Sheet ID',
+  'Renter Sheet URL'
 ];
 
 const BILL_HEADERS = [
@@ -62,6 +65,22 @@ const REQUEST_HEADERS = [
   'Message',
   'Status',
   'Created At',
+  'Updated At'
+];
+
+const RENTER_PROFILE_HEADERS = ['Field', 'Value'];
+const RENTER_LEDGER_HEADERS = [
+  'Transaction ID',
+  'Billing Month',
+  'Billing Date',
+  'Rental Place',
+  'Room Number',
+  'Rent',
+  'Water Bill',
+  'Electricity Bill',
+  'Total',
+  'Payment Status',
+  'Notes',
   'Updated At'
 ];
 
@@ -161,11 +180,18 @@ function databaseUrl() {
 
 function ensureDatabaseSharing_() {
   const file = DriveApp.getFileById(SPREADSHEET_ID);
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+  file.setShareableByEditors(false);
   file.getEditors().forEach(user => {
     const email = user.getEmail().toLowerCase();
     if (DATABASE_EDITOR_EMAILS.indexOf(email) === -1) {
       file.removeEditor(email);
+    }
+  });
+  file.getViewers().forEach(user => {
+    const email = user.getEmail().toLowerCase();
+    if (DATABASE_EDITOR_EMAILS.indexOf(email) === -1) {
+      file.removeViewer(email);
     }
   });
   DATABASE_EDITOR_EMAILS.forEach(email => file.addEditor(email));
@@ -180,6 +206,7 @@ function getPublicData() {
 
 function getAdminData(password) {
   assertAdmin_(password);
+  ensureDatabaseSharing_();
   return {
     bills: getAllBills_(),
     renters: getPublicRenters_(),
@@ -192,12 +219,13 @@ function registerRenter(form) {
   const username = normalizeUsername_(form.username);
   const password = String(form.password || '');
   const fullName = String(form.fullName || '').trim();
+  const email = normalizeEmail_(form.email);
   const phone = String(form.phone || '').trim();
   const accountStatus = 'Renting';
   const rentalPlace = String(form.rentalPlace || '').trim();
   const roomNumber = String(form.roomNumber || '').trim();
 
-  if (!username || !password || !fullName || !rentalPlace || !roomNumber) {
+  if (!username || !password || !fullName || !email || !rentalPlace || !roomNumber) {
     throw new Error('Complete the account and room details.');
   }
 
@@ -221,10 +249,20 @@ function registerRenter(form) {
     rentalPlace,
     roomNumber,
     now,
-    now
+    now,
+    email,
+    '',
+    ''
   ]);
 
-  return renterSession_(getRenterByUsername_(username));
+  let renter = getRenterByUsername_(username);
+  const renterSheet = ensureRenterSpreadsheet_(renter);
+  const sheet = sheet_(RENTERS_SHEET, RENTER_HEADERS);
+  sheet.getRange(renter.rowNumber, 11, 1, 2).setValues([[renterSheet.id, renterSheet.url]]);
+  renter = getRenterByUsername_(username);
+  syncRenterSpreadsheet_(renter);
+
+  return renterSession_(renter);
 }
 
 function loginRenter(username, password) {
@@ -282,7 +320,9 @@ function updateRenterPhone(username, password, phone) {
   sheet.getRange(renter.rowNumber, 4).setValue(String(phone || '').trim());
   sheet.getRange(renter.rowNumber, 9).setValue(now_());
 
-  return renterSession_(getRenterByUsername_(normalized));
+  const updated = getRenterByUsername_(normalized);
+  syncRenterSpreadsheet_(updated);
+  return renterSession_(updated);
 }
 
 function submitRoomChangeRequest(username, password, request) {
@@ -394,6 +434,7 @@ function addBilling(password, form) {
     now
   ]);
 
+  syncRenterSpreadsheet_(getRenterByUsername_(renter.username));
   return getAdminData(password);
 }
 
@@ -430,6 +471,7 @@ function updateBilling(password, transactionId, update) {
     now_()
   ]]);
 
+  syncRenterSpreadsheet_(getRenterByUsername_(current.username));
   return getAdminData(password);
 }
 
@@ -461,10 +503,12 @@ function getPublicRenters_() {
   return getAllRenters_().map(renter => ({
     username: renter.username,
     fullName: renter.fullName,
+    email: renter.email,
     phone: renter.phone,
     accountStatus: renter.accountStatus,
     rentalPlace: renter.rentalPlace,
-    roomNumber: renter.roomNumber
+    roomNumber: renter.roomNumber,
+    renterSheetUrl: renter.renterSheetUrl
   }));
 }
 
@@ -560,10 +604,12 @@ function renterSession_(renter) {
     user: {
       username: renter.username,
       fullName: renter.fullName,
+      email: renter.email,
       phone: renter.phone,
       accountStatus: renter.accountStatus,
       rentalPlace: renter.accountStatus === 'Renting' ? renter.rentalPlace : '',
-      roomNumber: renter.accountStatus === 'Renting' ? renter.roomNumber : ''
+      roomNumber: renter.accountStatus === 'Renting' ? renter.roomNumber : '',
+      renterSheetUrl: renter.renterSheetUrl
     },
     bills: getRenterBills(renter.username),
     rooms: getAvailableRooms_(renter.username)
@@ -585,7 +631,10 @@ function renterFromRow_(row, rowNumber) {
     rentalPlace: oldFormat ? inferredRoom.place : row[5] || '',
     roomNumber: oldFormat ? inferredRoom.roomNumber : row[6] || '',
     createdAt: oldFormat ? row[5] || '' : row[7] || '',
-    updatedAt: oldFormat ? row[5] || '' : row[8] || ''
+    updatedAt: oldFormat ? row[5] || '' : row[8] || '',
+    email: oldFormat ? '' : normalizeEmail_(row[9]),
+    renterSheetId: oldFormat ? '' : row[10] || '',
+    renterSheetUrl: oldFormat ? '' : row[11] || ''
   };
 }
 
@@ -660,6 +709,102 @@ function requestFromRow_(row, rowNumber) {
   };
 }
 
+function ensureRenterSpreadsheet_(renter) {
+  if (renter.renterSheetId) {
+    return {
+      id: renter.renterSheetId,
+      url: renter.renterSheetUrl || `https://docs.google.com/spreadsheets/d/${renter.renterSheetId}/edit`
+    };
+  }
+
+  if (!renter.email) {
+    throw new Error('Renter email is required to create a private spreadsheet.');
+  }
+
+  const spreadsheet = SpreadsheetApp.create(`${renter.username}_rent`);
+  const file = DriveApp.getFileById(spreadsheet.getId());
+  file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+  file.setShareableByEditors(false);
+  DATABASE_EDITOR_EMAILS.forEach(email => file.addEditor(email));
+  file.addViewer(renter.email);
+
+  return {
+    id: spreadsheet.getId(),
+    url: spreadsheet.getUrl()
+  };
+}
+
+function syncRenterSpreadsheet_(renter) {
+  if (!renter || !renter.renterSheetId) return;
+
+  const spreadsheet = SpreadsheetApp.openById(renter.renterSheetId);
+  const file = DriveApp.getFileById(renter.renterSheetId);
+  file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+  file.setShareableByEditors(false);
+  pruneFileAccess_(file, renter.email);
+  DATABASE_EDITOR_EMAILS.forEach(email => file.addEditor(email));
+  if (renter.email) {
+    file.addViewer(renter.email);
+  }
+
+  const profile = getOrCreateSheet_(spreadsheet, 'Profile');
+  profile.clearContents();
+  profile.getRange(1, 1, 1, RENTER_PROFILE_HEADERS.length).setValues([RENTER_PROFILE_HEADERS]);
+  profile.getRange(2, 1, 8, 2).setValues([
+    ['Username', renter.username],
+    ['Full Name', renter.fullName],
+    ['Email', renter.email],
+    ['Phone', renter.phone],
+    ['Account Status', renter.accountStatus],
+    ['Rental Place', renter.rentalPlace],
+    ['Room Number', renter.roomNumber],
+    ['Updated At', now_()]
+  ]);
+  profile.setFrozenRows(1);
+
+  const ledger = getOrCreateSheet_(spreadsheet, 'Rent Ledger');
+  ledger.clearContents();
+  ledger.getRange(1, 1, 1, RENTER_LEDGER_HEADERS.length).setValues([RENTER_LEDGER_HEADERS]);
+  const bills = getRenterBills(renter.username).map(bill => [
+    bill.transactionId,
+    bill.billingMonth,
+    bill.billingDate,
+    bill.rentalPlace,
+    bill.roomNumber,
+    bill.rent,
+    bill.waterBill,
+    bill.electricityBill,
+    bill.total,
+    bill.paymentStatus,
+    bill.notes,
+    bill.updatedAt
+  ]);
+  if (bills.length) {
+    ledger.getRange(2, 1, bills.length, RENTER_LEDGER_HEADERS.length).setValues(bills);
+  }
+  ledger.setFrozenRows(1);
+}
+
+function pruneFileAccess_(file, viewerEmail) {
+  const allowed = DATABASE_EDITOR_EMAILS.concat(viewerEmail ? [viewerEmail] : []);
+  file.getEditors().forEach(user => {
+    const email = user.getEmail().toLowerCase();
+    if (allowed.indexOf(email) === -1) {
+      file.removeEditor(email);
+    }
+  });
+  file.getViewers().forEach(user => {
+    const email = user.getEmail().toLowerCase();
+    if (allowed.indexOf(email) === -1) {
+      file.removeViewer(email);
+    }
+  });
+}
+
+function getOrCreateSheet_(spreadsheet, name) {
+  return spreadsheet.getSheetByName(name) || spreadsheet.insertSheet(name);
+}
+
 function sheet_(name, headers) {
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   let sheet = spreadsheet.getSheetByName(name);
@@ -692,6 +837,10 @@ function assertValidRoom_(rentalPlace, roomNumber) {
 
 function normalizeUsername_(username) {
   return String(username || '').trim().toLowerCase();
+}
+
+function normalizeEmail_(email) {
+  return String(email || '').trim().toLowerCase();
 }
 
 function hashPassword_(username, password) {
@@ -755,6 +904,7 @@ function normalizeSignupPayload_(payload) {
     username: payload.username,
     password: payload.password,
     fullName: payload.fullName || payload.renterName,
+    email: payload.email,
     phone: payload.phone,
     rentalPlace: payload.rentalPlace || parsedRoom.place,
     roomNumber: payload.roomNumber || parsedRoom.roomNumber

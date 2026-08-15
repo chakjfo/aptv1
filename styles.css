@@ -234,6 +234,11 @@
     width: 100%;
   }
   .rail-link.active { background: #ffffff; color: var(--accent-dark); }
+  .rail-link.disabled {
+    cursor: not-allowed;
+    opacity: 0.52;
+    pointer-events: none;
+  }
 
   .workspace { padding: 28px; }
   .workspace-head {
