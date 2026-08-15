@@ -1650,18 +1650,18 @@
     background:
       radial-gradient(circle at 18% -8%, rgba(124, 58, 237, 0.46), transparent 34%),
       radial-gradient(circle at 105% 6%, rgba(236, 72, 153, 0.32), transparent 30%),
-      linear-gradient(180deg, var(--primary-base) 0%, var(--greyscale-900) 44%, var(--greyscale-50) 44%, var(--greyscale-50) 100%);
+      linear-gradient(180deg, var(--primary-base) 0%, var(--greyscale-900) 58%, var(--greyscale-50) 58%, var(--greyscale-50) 100%);
     color: #ffffff;
   }
 
   body.phone-layout[data-page="home"] .site-shell {
     min-height: 100dvh;
-    padding: 14px;
+    padding: 12px;
   }
 
   body.phone-layout[data-page="home"] .mobile-home {
     display: grid;
-    gap: 14px;
+    gap: 10px;
     min-height: auto;
   }
 
@@ -1672,29 +1672,29 @@
   body.phone-layout[data-page="home"] .mobile-home .brand.dark {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.14);
-    border-radius: 20px;
-    padding: 10px;
+    border-radius: 18px;
+    padding: 8px 10px;
   }
 
   body.phone-layout[data-page="home"] .mobile-home .brand strong {
-    font-size: 0.95rem;
+    font-size: 0.82rem;
   }
 
   body.phone-layout[data-page="home"] .mobile-home .brand span {
     display: block;
-    font-size: 0.72rem;
+    font-size: 0.66rem;
   }
 
   body.phone-layout[data-page="home"] .mobile-hero-copy {
     background:
       linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05));
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 28px;
+    border-radius: 24px;
     box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
     display: block;
     flex: none;
     min-height: 0;
-    padding: 24px 20px;
+    padding: 20px 16px;
   }
 
   body.phone-layout[data-page="home"] .mobile-hero-copy::before {
@@ -1703,25 +1703,25 @@
 
   body.phone-layout[data-page="home"] .mobile-hero-copy .eyebrow {
     color: var(--secondary-200);
-    font-size: 0.72rem;
-    margin-bottom: 16px;
+    font-size: 0.66rem;
+    margin-bottom: 12px;
   }
 
   body.phone-layout[data-page="home"] .mobile-hero-copy h1 {
     color: #ffffff;
-    font-size: clamp(3.1rem, 16vw, 4.9rem);
+    font-size: clamp(2.85rem, 15vw, 4.15rem);
     letter-spacing: 0;
-    line-height: 0.88;
-    margin: 0 0 16px;
-    max-width: 340px;
+    line-height: 0.9;
+    margin: 0 0 12px;
+    max-width: 300px;
   }
 
   body.phone-layout[data-page="home"] .mobile-hero-copy p:not(.eyebrow) {
     color: rgba(255, 255, 255, 0.78);
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 800;
-    line-height: 1.45;
-    max-width: 300px;
+    line-height: 1.32;
+    max-width: 270px;
   }
 
   .mobile-mini-grid {
@@ -1730,15 +1730,16 @@
 
   body.phone-layout[data-page="home"] .mobile-mini-grid {
     display: grid;
-    gap: 10px;
+    gap: 8px;
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   body.phone-layout[data-page="home"] .mobile-mini-grid div {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.13);
-    border-radius: 20px;
-    padding: 14px 10px;
+    border-radius: 16px;
+    min-width: 0;
+    padding: 10px 8px;
   }
 
   body.phone-layout[data-page="home"] .mobile-mini-grid span,
@@ -1748,36 +1749,42 @@
 
   body.phone-layout[data-page="home"] .mobile-mini-grid span {
     color: #ffffff;
-    font-size: 1.15rem;
+    font-size: 1rem;
     font-weight: 1000;
+    overflow-wrap: anywhere;
   }
 
   body.phone-layout[data-page="home"] .mobile-mini-grid strong {
     color: rgba(255, 255, 255, 0.64);
-    font-size: 0.72rem;
+    font-size: 0.62rem;
     margin-top: 3px;
     text-transform: uppercase;
   }
 
   body.phone-layout[data-page="home"] .mobile-action-stack {
-    gap: 10px;
-    padding: 2px 0 0;
+    gap: 8px;
+    padding: 8px 0 0;
   }
 
   body.phone-layout[data-page="home"] .mobile-action {
-    border-radius: 22px;
+    border-radius: 18px;
     box-shadow: 0 16px 42px rgba(16, 19, 34, 0.12);
-    min-height: 68px;
-    padding: 14px 16px;
+    gap: 12px;
+    min-height: 56px;
+    padding: 12px 14px;
   }
 
   body.phone-layout[data-page="home"] .mobile-action span {
-    font-size: 0.68rem;
+    flex: 0 0 92px;
+    font-size: 0.62rem;
     letter-spacing: 0;
   }
 
   body.phone-layout[data-page="home"] .mobile-action strong {
-    font-size: 1rem;
+    flex: 1;
+    font-size: 0.92rem;
+    overflow-wrap: anywhere;
+    text-align: right;
   }
 
   body.phone-layout[data-page="home"] .primary-action {
@@ -1801,14 +1808,15 @@
     }
 
     body.phone-layout[data-page="home"] .mobile-hero-copy {
-      padding: 22px 18px;
+      padding: 18px 14px;
     }
 
     body.phone-layout[data-page="home"] .mobile-hero-copy h1 {
-      font-size: clamp(2.85rem, 16vw, 4.2rem);
+      font-size: clamp(2.45rem, 14vw, 3.25rem);
     }
 
     body.phone-layout[data-page="home"] .mobile-action {
-      min-height: 64px;
+      min-height: 54px;
+      padding: 11px 12px;
     }
   }
