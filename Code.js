@@ -255,24 +255,18 @@ function registerRenter(form) {
     ''
   ]);
 
-  let renter = getRenterByUsername_(username);
-  const renterSheet = ensureRenterSpreadsheet_(renter);
-  const sheet = sheet_(RENTERS_SHEET, RENTER_HEADERS);
-  sheet.getRange(renter.rowNumber, 11, 1, 2).setValues([[renterSheet.id, renterSheet.url]]);
-  renter = getRenterByUsername_(username);
-  syncRenterSpreadsheet_(renter);
-
-  return renterSession_(renter);
+  return renterSession_(provisionRenterSpreadsheet_(getRenterByUsername_(username)));
 }
 
 function loginRenter(username, password) {
   const normalized = normalizeUsername_(username);
-  const renter = getRenterByUsername_(normalized);
+  let renter = getRenterByUsername_(normalized);
 
   if (!renter || renter.passwordHash !== hashPassword_(normalized, String(password || ''))) {
     throw new Error('Invalid username or password.');
   }
 
+  renter = provisionRenterSpreadsheet_(renter);
   return renterSession_(renter);
 }
 
@@ -732,6 +726,20 @@ function ensureRenterSpreadsheet_(renter) {
     id: spreadsheet.getId(),
     url: spreadsheet.getUrl()
   };
+}
+
+function provisionRenterSpreadsheet_(renter) {
+  if (!renter || !renter.email) return renter;
+
+  if (!renter.renterSheetId) {
+    const renterSheet = ensureRenterSpreadsheet_(renter);
+    const sheet = sheet_(RENTERS_SHEET, RENTER_HEADERS);
+    sheet.getRange(renter.rowNumber, 11, 1, 2).setValues([[renterSheet.id, renterSheet.url]]);
+    renter = getRenterByUsername_(renter.username);
+  }
+
+  syncRenterSpreadsheet_(renter);
+  return renter;
 }
 
 function syncRenterSpreadsheet_(renter) {
