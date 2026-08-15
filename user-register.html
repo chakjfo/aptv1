@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body data-page="user-register">
+    <main class="auth-stage register-stage">
+      <section class="auth-visual">
+        <a class="back-link light" target="_top" href="/">Back to home</a>
+        <div class="brand jumbo">
+          <div class="brand-icon">SL</div>
+          <div>
+            <strong>StayLedger</strong>
+            <span>New renter setup</span>
+          </div>
+        </div>
+        <h1>Claim an available room and start your billing history.</h1>
+        <p>Only open rooms appear, so double-booking stays blocked from the start.</p>
+      </section>
+      <section class="auth-card elevated wide-card">
+        <p class="eyebrow">Renter Registration</p>
+        <h2>Create account</h2>
+        <p class="muted-line top">Choose your available room and set up your login.</p>
+        <form id="userRegisterForm" class="form-stack">
+          <div class="two-col">
+            <label>Full Name<input name="fullName" required></label>
+            <label>Phone<input name="phone"></label>
+          </div>
+          <div class="two-col">
+            <label>Username<input name="username" required></label>
+            <label>Password<input name="password" type="password" required></label>
+          </div>
+          <div class="two-col">
+            <label>Rental Place<select name="rentalPlace" id="registerPlace" required></select></label>
+            <label>Room Number<select name="roomNumber" id="registerRoom" required></select></label>
+          </div>
+          <button class="button primary" type="submit">Create Account</button>
+        </form>
+        <p class="muted-line">Already registered? <a target="_top" href="/user-login.html">Sign in</a></p>
+      </section>
+    </main>
+    <div class="toast" id="toast"></div>
+    <script src="/client.js"></script>
+  </body>
+</html>

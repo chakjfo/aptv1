@@ -1,9 +1,8 @@
 <!doctype html>
 <html>
   <head>
-    <base target="_top">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?!= include('Styles'); ?>
+    <link rel="stylesheet" href="/styles.css">
   </head>
   <body data-page="home">
     <main class="site-shell">
@@ -17,8 +16,8 @@
             </div>
           </div>
           <div class="nav-actions">
-            <a class="link-button ghost" target="_top" href="<?= appUrl(); ?>?page=user-login">User Login</a>
-            <a class="link-button primary" target="_top" href="<?= appUrl(); ?>?page=admin-login">Admin</a>
+            <a class="link-button ghost" target="_top" href="/user-login.html">User Login</a>
+            <a class="link-button primary" target="_top" href="/admin-login.html">Admin</a>
           </div>
         </nav>
 
@@ -29,9 +28,9 @@
             Six fixed rooms, monthly transactions, renter status, and bill histories, wrapped in a clean Apps Script dashboard.
           </p>
           <div class="hero-actions">
-            <a class="link-button primary large" target="_top" href="<?= appUrl(); ?>?page=user-login">Login as Renter</a>
-            <a class="link-button soft large" target="_top" href="<?= appUrl(); ?>?page=user-register">Create Renter Account</a>
-            <a class="link-button soft large" target="_top" href="<?= databaseUrl(); ?>">View Spreadsheet Database</a>
+            <a class="link-button primary large" target="_top" href="/user-login.html">Login as Renter</a>
+            <a class="link-button soft large" target="_top" href="/user-register.html">Create Renter Account</a>
+            <a class="link-button soft large" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/12GxOoQuLLXFlFWCJP0HRCauA-AMasfsd5izJjUv6gwQ/edit">View Spreadsheet Database</a>
           </div>
         </div>
       </section>
@@ -71,19 +70,19 @@
         </div>
 
         <div class="mobile-action-stack">
-          <a class="mobile-action primary-action" target="_top" href="<?= appUrl(); ?>?page=user-login">
+          <a class="mobile-action primary-action" target="_top" href="/user-login.html">
             <span>Renter</span>
             <strong>Login to dashboard</strong>
           </a>
-          <a class="mobile-action secondary-action" target="_top" href="<?= appUrl(); ?>?page=user-register">
+          <a class="mobile-action secondary-action" target="_top" href="/user-register.html">
             <span>New renter</span>
             <strong>Create account</strong>
           </a>
-          <a class="mobile-action admin-action" target="_top" href="<?= appUrl(); ?>?page=admin-login">
+          <a class="mobile-action admin-action" target="_top" href="/admin-login.html">
             <span>Admin</span>
             <strong>Open management</strong>
           </a>
-          <a class="mobile-action database-action" target="_top" href="<?= databaseUrl(); ?>">
+          <a class="mobile-action database-action" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/12GxOoQuLLXFlFWCJP0HRCauA-AMasfsd5izJjUv6gwQ/edit">
             <span>Database</span>
             <strong>View spreadsheet records</strong>
           </a>
@@ -91,7 +90,6 @@
       </section>
       <div class="toast" id="toast"></div>
     </main>
-    <script>const APP_URL = '<?= appUrl(); ?>';</script>
-    <?!= include('Client'); ?>
+    <script src="/client.js"></script>
   </body>
 </html>

@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body data-page="admin-dashboard">
+    <div class="dashboard-shell">
+      <aside class="rail">
+        <div class="brand">
+          <div class="brand-icon">SL</div>
+          <div><strong>StayLedger</strong><span>Admin</span></div>
+        </div>
+        <a class="rail-link active" target="_top" href="/admin-dashboard.html">Dashboard</a>
+        <a class="rail-link" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/12GxOoQuLLXFlFWCJP0HRCauA-AMasfsd5izJjUv6gwQ/edit">Spreadsheet</a>
+        <button class="rail-link" id="adminLogout" type="button">Logout</button>
+      </aside>
+      <main class="workspace">
+        <header class="workspace-head">
+          <div>
+            <p class="eyebrow">Admin Dashboard</p>
+            <h1>Billing operations</h1>
+          </div>
+          <div class="account-chips">
+            <span class="chip" id="adminRenterCount">0 renters</span>
+            <span class="chip" id="adminBillCount">0 billings</span>
+          </div>
+        </header>
+
+        <section class="room-grid compact" id="roomCards"></section>
+
+        <section class="panel requests-panel">
+          <div class="panel-head">
+            <div><p class="eyebrow">Renter Requests</p><h2>Room change queue</h2></div>
+          </div>
+          <div class="request-list" id="adminRequestsList"></div>
+        </section>
+
+        <section class="admin-grid">
+          <form class="panel form-stack" id="billingForm">
+            <div class="panel-head"><div><p class="eyebrow">Input New Billing</p><h2>Room transaction</h2></div></div>
+            <div class="two-col">
+              <label>Rental Place<select name="rentalPlace" id="billingPlace" required></select></label>
+              <label>Room Number<select name="roomNumber" id="billingRoom" required></select></label>
+            </div>
+            <label>Renter Name<input name="renterName" id="billingRenterName" readonly></label>
+            <div class="two-col">
+              <label>Billing Month<input name="billingMonth" type="month" required></label>
+              <label>Billing Date<input name="billingDate" type="date" required></label>
+            </div>
+            <div class="three-col">
+              <label>Rent<input name="rent" type="number" min="0" value="0"></label>
+              <label>Water<input name="waterBill" type="number" min="0" value="0"></label>
+              <label>Electricity<input name="electricityBill" type="number" min="0" value="0"></label>
+            </div>
+            <label>Payment Status
+              <select name="paymentStatus"><option>Unpaid</option><option>Partial</option><option>Paid</option></select>
+            </label>
+            <label>Notes<textarea name="notes" rows="3"></textarea></label>
+            <button class="button primary" type="submit">Add Billing</button>
+          </form>
+
+          <section class="panel table-panel">
+            <div class="panel-head"><div><p class="eyebrow">Database Table</p><h2>Billing transactions</h2></div></div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Txn</th><th>Renter</th><th>Place</th><th>Room</th><th>Month</th><th>Date</th><th>Rent</th><th>Water</th><th>Electric</th><th>Status</th><th>Notes</th><th></th>
+                  </tr>
+                </thead>
+                <tbody id="adminBillsTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script src="/client.js"></script>
+  </body>
+</html>

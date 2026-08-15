@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body data-page="user-login">
+    <main class="auth-stage renter-stage">
+      <section class="auth-visual">
+        <a class="back-link light" target="_top" href="/">Back to home</a>
+        <div class="brand jumbo">
+          <div class="brand-icon">SL</div>
+          <div>
+            <strong>StayLedger</strong>
+            <span>Renter portal</span>
+          </div>
+        </div>
+        <h1>Track every month without chasing paper receipts.</h1>
+        <p>View your rent, water, electricity, billing date, and full history from one clean dashboard.</p>
+        <div class="floating-stack">
+          <span>Monthly bills</span>
+          <span>Room status</span>
+          <span>Payment tracking</span>
+        </div>
+      </section>
+      <section class="auth-card elevated">
+        <p class="eyebrow">Renter Access</p>
+        <h2>Welcome back</h2>
+        <p class="muted-line top">Sign in using your renter account.</p>
+        <form id="userLoginForm" class="form-stack">
+          <label>Username<input name="username" placeholder="ex. maria101" required></label>
+          <label>Password<input name="password" type="password" placeholder="Your password" required></label>
+          <button class="button primary" type="submit">Enter Dashboard</button>
+        </form>
+        <p class="muted-line">No account yet? <a target="_top" href="/user-register.html">Create one</a></p>
+      </section>
+    </main>
+    <div class="toast" id="toast"></div>
+    <script src="/client.js"></script>
+  </body>
+</html>

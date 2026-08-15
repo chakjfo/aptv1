@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/user-login", "destination": "/user-login.html" },
+    { "source": "/user-register", "destination": "/user-register.html" },
+    { "source": "/user-dashboard", "destination": "/user-dashboard.html" },
+    { "source": "/admin-login", "destination": "/admin-login.html" },
+    { "source": "/admin-dashboard", "destination": "/admin-dashboard.html" }
+  ]
+}
