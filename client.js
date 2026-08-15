@@ -16,12 +16,37 @@ const page = document.body.dataset.page;
 
   function init() {
     applyPhoneLayout();
+    initRailMenu();
     if (page === 'home') initHome();
     if (page === 'user-login') initUserLogin();
     if (page === 'user-register') initUserRegister();
     if (page === 'user-dashboard') initUserDashboard();
     if (page === 'admin-login') initAdminLogin();
     if (page === 'admin-dashboard') initAdminDashboard();
+  }
+
+  function initRailMenu() {
+    const rail = document.querySelector('.rail');
+    const button = document.querySelector('.rail-menu-button');
+    if (!rail || !button) return;
+
+    button.addEventListener('click', () => {
+      const isOpen = rail.classList.toggle('is-open');
+      button.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    document.addEventListener('click', event => {
+      if (!rail.classList.contains('is-open')) return;
+      if (rail.contains(event.target)) return;
+      rail.classList.remove('is-open');
+      button.setAttribute('aria-expanded', 'false');
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      rail.classList.remove('is-open');
+      button.setAttribute('aria-expanded', 'false');
+    });
   }
 
   function applyPhoneLayout() {
