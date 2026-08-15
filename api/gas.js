@@ -18,11 +18,13 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const upstream = await fetch(gasUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(req.body || {})
-    });
+    const body = JSON.stringify(req.body || {});
+    let upstream = await postToAppsScript(gasUrl, body);
+    const redirectUrl = upstream.headers.get('location');
+
+    if (upstream.status >= 300 && upstream.status < 400 && redirectUrl) {
+      upstream = await postToAppsScript(redirectUrl, body);
+    }
 
     const text = await upstream.text();
     let data;
@@ -44,3 +46,12 @@ module.exports = async function handler(req, res) {
     });
   }
 };
+
+function postToAppsScript(url, body) {
+  return fetch(url, {
+    method: 'POST',
+    redirect: 'manual',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body
+  });
+}
