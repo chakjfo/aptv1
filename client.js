@@ -149,6 +149,7 @@ const page = document.body.dataset.page;
   }
 
   async function initUserDashboard() {
+    initRenterSpreadsheetLink();
     const auth = readSession('renterAuth');
     if (!auth) {
       showContinue('Session needed', 'Please sign in again to view your renter dashboard.', 'Back to Login', 'user-login');
@@ -219,8 +220,7 @@ const page = document.body.dataset.page;
     document.getElementById('userPhoneInput').value = user.phone || '';
     const sheetLink = document.getElementById('userSpreadsheetLink');
     if (sheetLink) {
-      sheetLink.href = user.renterSheetUrl || '#';
-      sheetLink.classList.toggle('disabled', !user.renterSheetUrl);
+      setRenterSpreadsheetLink(user.renterSheetUrl);
     }
     populatePlaceSelect(document.getElementById('requestPlace'), session.rooms || []);
     populateRoomSelect(document.getElementById('requestRoom'), document.getElementById('requestPlace').value, session.rooms || []);
@@ -228,6 +228,40 @@ const page = document.body.dataset.page;
       populateRoomSelect(document.getElementById('requestRoom'), document.getElementById('requestPlace').value, state.userSession.rooms || []);
     };
     renderUserBills(session.bills || []);
+  }
+
+  function initRenterSpreadsheetLink() {
+    const sheetLink = document.getElementById('userSpreadsheetLink');
+    if (!sheetLink) return;
+
+    sheetLink.addEventListener('click', event => {
+      if (!sheetLink.dataset.href) {
+        event.preventDefault();
+        showToast('Your private spreadsheet is still being prepared. Try signing in again in a moment.');
+      }
+    });
+  }
+
+  function setRenterSpreadsheetLink(url) {
+    const sheetLink = document.getElementById('userSpreadsheetLink');
+    if (!sheetLink) return;
+
+    if (!url) {
+      sheetLink.removeAttribute('target');
+      sheetLink.removeAttribute('rel');
+      sheetLink.removeAttribute('href');
+      delete sheetLink.dataset.href;
+      sheetLink.setAttribute('aria-disabled', 'true');
+      sheetLink.classList.add('disabled');
+      return;
+    }
+
+    sheetLink.href = url;
+    sheetLink.dataset.href = url;
+    sheetLink.target = '_blank';
+    sheetLink.rel = 'noopener';
+    sheetLink.setAttribute('aria-disabled', 'false');
+    sheetLink.classList.remove('disabled');
   }
 
   function bindRenterSelfService(auth) {
