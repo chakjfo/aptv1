@@ -1,10 +1,12 @@
+const DEFAULT_GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwIRygfpHkpFWBFyM4fIzN4w5rpy3OtsUKn11s_bZe6c0QbEWI_E1nESiOzzUmO1W4/exec';
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, error: 'Method not allowed.' });
   }
 
-  const gasUrl = process.env.GAS_WEB_APP_URL;
+  const gasUrl = process.env.GAS_WEB_APP_URL || DEFAULT_GAS_WEB_APP_URL;
   if (!gasUrl) {
     return res.status(500).json({ ok: false, error: 'Missing GAS_WEB_APP_URL environment variable.' });
   }
