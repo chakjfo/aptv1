@@ -948,10 +948,24 @@
     grid-column: 1 / -1;
   }
 
+  .continue-stage {
+    align-items: center;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    justify-items: center;
+    min-height: 100dvh;
+    padding: 20px;
+  }
+
+  .continue-stage .continue-card {
+    grid-column: auto;
+    margin: 0;
+  }
+
   @media (max-width: 720px) {
     .continue-card {
       border-radius: 24px;
-      margin: 18px;
+      margin: 0;
     }
   }
   .room-action {
@@ -1476,6 +1490,17 @@
     display: block;
     min-height: 100dvh;
     padding: 10px;
+  }
+
+  body.phone-layout .continue-stage {
+    display: grid;
+    padding: 16px;
+    place-items: center;
+  }
+
+  body.phone-layout .continue-card {
+    max-width: 420px;
+    width: 100%;
   }
 
   body.phone-layout .auth-visual {

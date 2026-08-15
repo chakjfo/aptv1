@@ -604,6 +604,7 @@ const page = document.body.dataset.page;
 
   function showContinue(title, message, label, targetPage) {
     const main = document.querySelector('main') || document.body;
+    main.classList.add('continue-stage');
     main.innerHTML = `
       <section class="continue-card">
         <div class="continue-badge">Success</div>
