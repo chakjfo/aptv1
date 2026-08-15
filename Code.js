@@ -369,6 +369,9 @@ function addBilling(password, form) {
   if (!billingMonth || !billingDate) {
     throw new Error('Billing month and billing date are required.');
   }
+  if (total <= 0) {
+    throw new Error('Enter at least one billing amount greater than 0.');
+  }
 
   const transactionId = makeTransactionId_();
   sheet_(BILLS_SHEET, BILL_HEADERS).appendRow([
@@ -408,6 +411,10 @@ function updateBilling(password, transactionId, update) {
   const waterBill = money_(update.waterBill);
   const electricityBill = money_(update.electricityBill);
   const total = rent + waterBill + electricityBill;
+
+  if (total <= 0) {
+    throw new Error('Enter at least one billing amount greater than 0.');
+  }
 
   sheet.getRange(rowNumber, 7, 1, 11).setValues([[
     String(update.billingMonth || current.billingMonth).trim(),

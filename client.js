@@ -289,10 +289,11 @@ const page = document.body.dataset.page;
       event.preventDefault();
       const form = Object.fromEntries(new FormData(event.currentTarget).entries());
       try {
+        assertPositiveBillingTotal(form);
         setBusy(event.submitter, true);
         state.adminData = await serverCall('addBilling', password, form);
-        renderAdminDashboard();
         event.currentTarget.reset();
+        renderAdminDashboard();
         setTodayDefaults();
         populateBillingPlaces();
         populateBillingAmounts();
@@ -303,6 +304,18 @@ const page = document.body.dataset.page;
         setBusy(event.submitter, false);
       }
     });
+  }
+
+  function assertPositiveBillingTotal(form) {
+    const total = moneyValue(form.rent) + moneyValue(form.waterBill) + moneyValue(form.electricityBill);
+    if (total <= 0) {
+      throw new Error('Enter at least one billing amount greater than 0.');
+    }
+  }
+
+  function moneyValue(value) {
+    const amount = Number(value);
+    return Number.isFinite(amount) ? Math.max(0, amount) : 0;
   }
 
   async function saveBillRow(button) {
