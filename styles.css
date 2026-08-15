@@ -1650,19 +1650,20 @@
     background:
       radial-gradient(circle at 18% -8%, rgba(124, 58, 237, 0.46), transparent 34%),
       radial-gradient(circle at 105% 6%, rgba(236, 72, 153, 0.32), transparent 30%),
-      linear-gradient(180deg, var(--primary-base) 0%, var(--greyscale-900) 58%, var(--greyscale-50) 58%, var(--greyscale-50) 100%);
+      linear-gradient(180deg, var(--primary-base) 0%, var(--greyscale-900) 100%);
     color: #ffffff;
+    min-height: 100dvh;
   }
 
   body.phone-layout[data-page="home"] .site-shell {
     min-height: 100dvh;
-    padding: 12px;
+    padding: 12px 12px max(18px, env(safe-area-inset-bottom));
   }
 
   body.phone-layout[data-page="home"] .mobile-home {
     display: grid;
     gap: 10px;
-    min-height: auto;
+    min-height: calc(100dvh - 30px);
   }
 
   body.phone-layout[data-page="home"] .mobile-home-top {
@@ -1793,7 +1794,7 @@
 
   body.phone-layout[data-page="home"] .secondary-action,
   body.phone-layout[data-page="home"] .database-action {
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.95);
     color: var(--greyscale-900);
   }
 
