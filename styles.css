@@ -977,6 +977,16 @@
     width: 100%;
   }
 
+  .request-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .request-actions .button {
+    flex: 1;
+  }
+
   #billingForm button[type="submit"]:disabled {
     background: linear-gradient(135deg, #cbd5e1, #94a3b8);
     box-shadow: none;

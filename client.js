@@ -98,6 +98,8 @@ const page = document.body.dataset.page;
         return { action: name, password: args[0], transactionId: args[1], update: args[2] || {} };
       case 'adminMarkRoomUnoccupied':
         return { action: name, password: args[0], rentalPlace: args[1], roomNumber: args[2] };
+      case 'adminResolveRoomRequest':
+        return { action: name, password: args[0], requestId: args[1], decision: args[2] };
       default:
         return { action: name };
     }
@@ -561,8 +563,37 @@ const page = document.body.dataset.page;
           <div><dt>Message</dt><dd>${escapeHtml(request.message || '-')}</dd></div>
           <div><dt>Date</dt><dd>${escapeHtml(request.createdAt)}</dd></div>
         </dl>
+        ${request.status === 'Pending' ? `
+          <div class="request-actions">
+            <button class="button small primary" type="button" onclick="resolveRoomRequest('${escapeJs(request.requestId)}', 'approve')">Approve</button>
+            <button class="button small ghost" type="button" onclick="resolveRoomRequest('${escapeJs(request.requestId)}', 'reject')">Reject</button>
+          </div>
+        ` : ''}
       </article>
     `).join('') : '<p class="empty-mobile">No room change requests yet.</p>';
+  }
+
+  async function resolveRoomRequest(requestId, decision) {
+    const password = sessionStorage.getItem('adminPassword');
+    const label = decision === 'approve' ? 'approve' : 'reject';
+
+    if (!password) {
+      showContinue('Admin session needed', 'Please enter the admin password again.', 'Back to Admin Login', 'admin-login');
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to ${label} this room change request?`)) {
+      return;
+    }
+
+    try {
+      state.adminData = await serverCall('adminResolveRoomRequest', password, requestId, decision);
+      state.publicData = await serverCall('getPublicData');
+      renderAdminDashboard();
+      showToast(`Room request ${decision === 'approve' ? 'approved' : 'rejected'}.`);
+    } catch (error) {
+      showToast(error.message || 'Unable to update request.');
+    }
   }
 
   function accountChips(user) {

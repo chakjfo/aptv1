@@ -150,6 +150,9 @@ function doPost(e) {
       case 'adminMarkRoomUnoccupied':
         result = adminMarkRoomUnoccupied(payload.password || payload.adminPassword, payload.rentalPlace, payload.roomNumber);
         break;
+      case 'adminResolveRoomRequest':
+        result = adminResolveRoomRequest(payload.password || payload.adminPassword, payload.requestId, payload.decision);
+        break;
       default:
         throw new Error('Unknown API action.');
     }
@@ -382,6 +385,56 @@ function adminMarkRoomUnoccupied(password, rentalPlace, roomNumber) {
   return getAdminData(password);
 }
 
+function adminResolveRoomRequest(password, requestId, decision) {
+  assertAdmin_(password);
+  const normalizedId = String(requestId || '').trim();
+  const action = String(decision || '').trim().toLowerCase();
+  const requestRow = findRequestRow_(normalizedId);
+
+  if (!requestRow) {
+    throw new Error('Room change request was not found.');
+  }
+  if (action !== 'approve' && action !== 'reject') {
+    throw new Error('Choose approve or reject for the request.');
+  }
+
+  const sheet = sheet_(REQUESTS_SHEET, REQUEST_HEADERS);
+  const request = requestFromRow_(sheet.getRange(requestRow, 1, 1, REQUEST_HEADERS.length).getDisplayValues()[0], requestRow);
+
+  if (request.status !== 'Pending') {
+    throw new Error('This request has already been resolved.');
+  }
+
+  if (action === 'reject') {
+    sheet.getRange(requestRow, 10, 1, 3).setValues([['Rejected', request.createdAt, now_()]]);
+    return getAdminData(password);
+  }
+
+  const renter = getRenterByUsername_(request.username);
+  if (!renter) {
+    throw new Error('The renter for this request was not found.');
+  }
+
+  assertValidRoom_(request.requestedPlace, request.requestedRoom);
+  const occupied = getActiveRenterByRoom_(request.requestedPlace, request.requestedRoom, request.username);
+  if (occupied) {
+    throw new Error(`${request.requestedPlace} ${request.requestedRoom} is already occupied.`);
+  }
+
+  const renterSheet = sheet_(RENTERS_SHEET, RENTER_HEADERS);
+  renterSheet.getRange(renter.rowNumber, 5, 1, 5).setValues([[
+    'Renting',
+    request.requestedPlace,
+    request.requestedRoom,
+    renter.createdAt,
+    now_()
+  ]]);
+  sheet.getRange(requestRow, 10, 1, 3).setValues([['Approved', request.createdAt, now_()]]);
+
+  syncRenterSpreadsheet_(getRenterByUsername_(request.username));
+  return getAdminData(password);
+}
+
 function addBilling(password, form) {
   assertAdmin_(password);
 
@@ -583,6 +636,20 @@ function getActiveRenterByRoom_(rentalPlace, roomNumber, exceptUsername) {
 function findBillRow_(transactionId) {
   const normalized = String(transactionId || '').trim();
   const sheet = sheet_(BILLS_SHEET, BILL_HEADERS);
+  const lastRow = sheet.getLastRow();
+
+  if (lastRow < 2) {
+    return 0;
+  }
+
+  const values = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+  const index = values.findIndex(row => String(row[0]).trim() === normalized);
+  return index === -1 ? 0 : index + 2;
+}
+
+function findRequestRow_(requestId) {
+  const normalized = String(requestId || '').trim();
+  const sheet = sheet_(REQUESTS_SHEET, REQUEST_HEADERS);
   const lastRow = sheet.getLastRow();
 
   if (lastRow < 2) {
