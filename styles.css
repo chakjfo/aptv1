@@ -288,6 +288,11 @@
   td input, td select { min-height: 34px; min-width: 110px; padding: 6px 8px; }
   tbody tr:nth-child(even) td { background: #fcfdff; }
 
+  .table-link {
+    color: var(--secondary-base);
+    font-weight: 900;
+  }
+
   .toast {
     background: #101828;
     border-radius: 8px;

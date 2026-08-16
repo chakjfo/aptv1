@@ -8,6 +8,7 @@ const DATABASE_EDITOR_EMAILS = [
 const BILLS_SHEET = 'Bills';
 const RENTERS_SHEET = 'Renters';
 const REQUESTS_SHEET = 'Room Requests';
+const WIFI_LICENSES_SHEET = 'WiFi Licenses';
 
 const ROOM_INVENTORY = [
   { place: 'Malatabis', roomNumber: 'Room 1' },
@@ -64,6 +65,15 @@ const REQUEST_HEADERS = [
   'Requested Room',
   'Message',
   'Status',
+  'Created At',
+  'Updated At'
+];
+
+const WIFI_LICENSE_HEADERS = [
+  'WiFi Connection Name',
+  'License ID',
+  'Spreadsheet ID',
+  'Spreadsheet URL',
   'Created At',
   'Updated At'
 ];
@@ -153,6 +163,9 @@ function doPost(e) {
       case 'adminResolveRoomRequest':
         result = adminResolveRoomRequest(payload.password || payload.adminPassword, payload.requestId, payload.decision);
         break;
+      case 'adminCreateWifiLicenseSpreadsheet':
+        result = adminCreateWifiLicenseSpreadsheet(payload.password || payload.adminPassword, payload.form || payload);
+        break;
       default:
         throw new Error('Unknown API action.');
     }
@@ -214,7 +227,8 @@ function getAdminData(password) {
     bills: getAllBills_(),
     renters: getPublicRenters_(),
     rooms: getRoomCards_(),
-    requests: getAllRoomRequests_()
+    requests: getAllRoomRequests_(),
+    wifiLicenses: getAllWifiLicenses_()
   };
 }
 
@@ -435,6 +449,45 @@ function adminResolveRoomRequest(password, requestId, decision) {
   return getAdminData(password);
 }
 
+function adminCreateWifiLicenseSpreadsheet(password, form) {
+  assertAdmin_(password);
+  const wifiConName = String(form.wifiConName || '').trim();
+  const licenseId = String(form.licenseId || '').trim();
+
+  if (!wifiConName || !licenseId) {
+    throw new Error('WiFi connection name and license ID are required.');
+  }
+
+  const now = now_();
+  const spreadsheet = SpreadsheetApp.create(`wifi_${safeFilePart_(wifiConName)}_license`);
+  const file = DriveApp.getFileById(spreadsheet.getId());
+  file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+  file.setShareableByEditors(false);
+  DATABASE_EDITOR_EMAILS.forEach(email => file.addEditor(email));
+
+  const sheet = spreadsheet.getSheets()[0];
+  sheet.setName('WiFi License');
+  sheet.getRange(1, 1, 1, 2).setValues([['Field', 'Value']]);
+  sheet.getRange(2, 1, 4, 2).setValues([
+    ['WiFi Connection Name', wifiConName],
+    ['License ID', licenseId],
+    ['Created At', now],
+    ['Updated At', now]
+  ]);
+  sheet.setFrozenRows(1);
+
+  sheet_(WIFI_LICENSES_SHEET, WIFI_LICENSE_HEADERS).appendRow([
+    wifiConName,
+    licenseId,
+    spreadsheet.getId(),
+    spreadsheet.getUrl(),
+    now,
+    now
+  ]);
+
+  return getAdminData(password);
+}
+
 function addBilling(password, form) {
   assertAdmin_(password);
 
@@ -589,6 +642,22 @@ function getAllRoomRequests_() {
     .getDisplayValues()
     .filter(row => row.some(Boolean))
     .map((row, index) => requestFromRow_(row, index + 2))
+    .reverse();
+}
+
+function getAllWifiLicenses_() {
+  const sheet = sheet_(WIFI_LICENSES_SHEET, WIFI_LICENSE_HEADERS);
+  const lastRow = sheet.getLastRow();
+
+  if (lastRow < 2) {
+    return [];
+  }
+
+  return sheet
+    .getRange(2, 1, lastRow - 1, WIFI_LICENSE_HEADERS.length)
+    .getDisplayValues()
+    .filter(row => row.some(Boolean))
+    .map((row, index) => wifiLicenseFromRow_(row, index + 2))
     .reverse();
 }
 
@@ -771,6 +840,18 @@ function requestFromRow_(row, rowNumber) {
   };
 }
 
+function wifiLicenseFromRow_(row, rowNumber) {
+  return {
+    rowNumber,
+    wifiConName: row[0] || '',
+    licenseId: row[1] || '',
+    spreadsheetId: row[2] || '',
+    spreadsheetUrl: row[3] || '',
+    createdAt: row[4] || '',
+    updatedAt: row[5] || ''
+  };
+}
+
 function ensureRenterSpreadsheet_(renter) {
   if (renter.renterSheetId) {
     return {
@@ -917,6 +998,14 @@ function normalizeUsername_(username) {
 
 function normalizeEmail_(email) {
   return String(email || '').trim().toLowerCase();
+}
+
+function safeFilePart_(value) {
+  return String(value || '')
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 60) || 'wifi';
 }
 
 function hashPassword_(username, password) {
