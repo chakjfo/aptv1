@@ -46,6 +46,29 @@
         </section>
 
         <section class="admin-grid">
+          <form class="panel form-stack" id="wifiLicenseForm">
+            <div class="panel-head"><div><p class="eyebrow">WiFi License</p><h2>Digital record</h2></div></div>
+            <label>WiFi Connection Name<input name="wifiConName" placeholder="ex. Main Fiber" required></label>
+            <label>License ID<input name="licenseId" placeholder="License ID" required></label>
+            <button class="button primary" type="submit">Save WiFi License</button>
+          </form>
+
+          <section class="panel table-panel">
+            <div class="panel-head"><div><p class="eyebrow">WiFi Database</p><h2>Connection licenses</h2></div></div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>WiFi Connection</th><th>License ID</th><th>Created</th>
+                  </tr>
+                </thead>
+                <tbody id="wifiLicensesTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="admin-grid">
           <form class="panel form-stack" id="billingForm">
             <div class="panel-head"><div><p class="eyebrow">Input New Billing</p><h2>Room transaction</h2></div></div>
             <div class="two-col">

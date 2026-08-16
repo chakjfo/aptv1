@@ -100,6 +100,8 @@ const page = document.body.dataset.page;
         return { action: name, password: args[0], rentalPlace: args[1], roomNumber: args[2] };
       case 'adminResolveRoomRequest':
         return { action: name, password: args[0], requestId: args[1], decision: args[2] };
+      case 'adminAddWifiLicense':
+        return { action: name, password: args[0], form: args[1] || {} };
       default:
         return { action: name };
     }
@@ -202,6 +204,7 @@ const page = document.body.dataset.page;
       state.adminData = await serverCall('getAdminData', password);
       renderAdminDashboard();
       bindBillingForm(password);
+      bindWifiLicenseForm(password);
     } catch (error) {
       sessionStorage.removeItem('adminPassword');
       showContinue('Admin session expired', 'Please enter the admin password again.', 'Back to Admin Login', 'admin-login');
@@ -311,8 +314,30 @@ const page = document.body.dataset.page;
     populateBillingPlaces();
     renderAdminBills(state.adminData.bills || []);
     renderAdminRequests(state.adminData.requests || []);
+    renderWifiLicenses(state.adminData.wifiLicenses || []);
     setTodayDefaults();
     populateBillingAmounts();
+  }
+
+  function bindWifiLicenseForm(password) {
+    const form = document.getElementById('wifiLicenseForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const values = Object.fromEntries(new FormData(event.currentTarget).entries());
+      try {
+        setBusy(event.submitter, true);
+        state.adminData = await serverCall('adminAddWifiLicense', password, values);
+        event.currentTarget.reset();
+        renderAdminDashboard();
+        showToast('WiFi license saved.');
+      } catch (error) {
+        showToast(error.message || 'Unable to save WiFi license.');
+      } finally {
+        setBusy(event.submitter, false);
+      }
+    });
   }
 
   function bindBillingForm(password) {
@@ -544,6 +569,19 @@ const page = document.body.dataset.page;
         <td><button class="button small ghost" type="button" onclick="saveBillRow(this)">Save</button></td>
       </tr>
     `).join('') : '<tr><td colspan="12">No billing transactions yet.</td></tr>';
+  }
+
+  function renderWifiLicenses(records) {
+    const tbody = document.getElementById('wifiLicensesTable');
+    if (!tbody) return;
+
+    tbody.innerHTML = records.length ? records.map(record => `
+      <tr>
+        <td>${escapeHtml(record.wifiConName)}</td>
+        <td>${escapeHtml(record.licenseId)}</td>
+        <td>${escapeHtml(record.createdAt)}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="3">No WiFi license records yet.</td></tr>';
   }
 
   function renderAdminRequests(requests) {
