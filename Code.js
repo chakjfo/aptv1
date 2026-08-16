@@ -378,6 +378,7 @@ function adminMarkRoomUnoccupied(password, rentalPlace, roomNumber) {
     now_()
   ]]);
 
+  syncRenterSpreadsheet_(getRenterByUsername_(renter.username));
   return getAdminData(password);
 }
 

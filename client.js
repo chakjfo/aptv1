@@ -483,7 +483,7 @@ const page = document.body.dataset.page;
       return;
     }
 
-    if (!confirm(`Mark ${place} ${roomNumber} as unoccupied?`)) {
+    if (!confirm(`Mark ${place} ${roomNumber} as unoccupied? This will remove the renter from this room.`)) {
       return;
     }
 
