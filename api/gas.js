@@ -1,4 +1,4 @@
-const DEFAULT_GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby0D0cWgpnpUlAu7V6dyp35jtUOj7N4nNaaaXlcrpG42Vxc3Gq3egdM0TIawSc6ny5d/exec';
+const DEFAULT_GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzHDulctPGQU0vEwnFQsUH99THumVefPm-L6wlZ8XocW5tQJDvc7sm-FkLbt3E5eUWf/exec';
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {

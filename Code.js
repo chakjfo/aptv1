@@ -1,3 +1,4 @@
+// Apps Script backend. Vercel-only files are excluded from clasp deployments.
 const SPREADSHEET_ID = '12GxOoQuLLXFlFWCJP0HRCauA-AMasfsd5izJjUv6gwQ';
 const SPREADSHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit`;
 const ADMIN_PASSWORD = 'tatapulido1977';
