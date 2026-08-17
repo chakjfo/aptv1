@@ -1,10 +1,12 @@
+const DEFAULT_GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwIRygfpHkpFWBFyM4fIzN4w5rpy3OtsUKn11s_bZe6c0QbEWI_E1nESiOzzUmO1W4/exec';
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, error: 'Method not allowed.' });
   }
 
-  const gasUrl = process.env.GAS_WEB_APP_URL;
+  const gasUrl = process.env.GAS_WEB_APP_URL || DEFAULT_GAS_WEB_APP_URL;
   if (!gasUrl) {
     return res.status(500).json({ ok: false, error: 'Missing GAS_WEB_APP_URL environment variable.' });
   }
@@ -16,11 +18,13 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const upstream = await fetch(gasUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(req.body || {})
-    });
+    const body = JSON.stringify(req.body || {});
+    let upstream = await postToAppsScript(gasUrl, body);
+    const redirectUrl = upstream.headers.get('location');
+
+    if (upstream.status >= 300 && upstream.status < 400 && redirectUrl) {
+      upstream = await postToAppsScript(redirectUrl, body);
+    }
 
     const text = await upstream.text();
     let data;
@@ -42,3 +46,12 @@ module.exports = async function handler(req, res) {
     });
   }
 };
+
+function postToAppsScript(url, body) {
+  return fetch(url, {
+    method: 'POST',
+    redirect: 'manual',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body
+  });
+}
