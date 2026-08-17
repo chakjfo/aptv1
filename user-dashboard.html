@@ -7,13 +7,22 @@
   <body data-page="user-dashboard">
     <div class="dashboard-shell">
       <aside class="rail">
-        <div class="brand">
-          <div class="brand-icon">SL</div>
-          <div><strong>StayLedger</strong><span>Renter</span></div>
+        <div class="rail-top">
+          <div class="brand">
+            <div class="brand-icon">SL</div>
+            <div><strong>StayLedger</strong><span>Renter</span></div>
+          </div>
+          <button class="rail-menu-button" type="button" aria-expanded="false" aria-controls="userRailLinks" aria-label="Open dashboard menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </div>
-        <a class="rail-link active" target="_top" href="/user-dashboard.html">Dashboard</a>
-        <a class="rail-link" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/12GxOoQuLLXFlFWCJP0HRCauA-AMasfsd5izJjUv6gwQ/edit">Spreadsheet</a>
-        <button class="rail-link" id="userLogout" type="button">Logout</button>
+        <div class="rail-links" id="userRailLinks">
+          <a class="rail-link active" target="_top" href="/user-dashboard.html">Dashboard</a>
+          <a class="rail-link disabled" id="userSpreadsheetLink" aria-disabled="true" href="">Spreadsheet</a>
+          <button class="rail-link" id="userLogout" type="button">Logout</button>
+        </div>
       </aside>
       <main class="workspace">
         <header class="workspace-head">

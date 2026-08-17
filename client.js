@@ -16,12 +16,37 @@ const page = document.body.dataset.page;
 
   function init() {
     applyPhoneLayout();
+    initRailMenu();
     if (page === 'home') initHome();
     if (page === 'user-login') initUserLogin();
     if (page === 'user-register') initUserRegister();
     if (page === 'user-dashboard') initUserDashboard();
     if (page === 'admin-login') initAdminLogin();
     if (page === 'admin-dashboard') initAdminDashboard();
+  }
+
+  function initRailMenu() {
+    const rail = document.querySelector('.rail');
+    const button = document.querySelector('.rail-menu-button');
+    if (!rail || !button) return;
+
+    button.addEventListener('click', () => {
+      const isOpen = rail.classList.toggle('is-open');
+      button.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    document.addEventListener('click', event => {
+      if (!rail.classList.contains('is-open')) return;
+      if (rail.contains(event.target)) return;
+      rail.classList.remove('is-open');
+      button.setAttribute('aria-expanded', 'false');
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      rail.classList.remove('is-open');
+      button.setAttribute('aria-expanded', 'false');
+    });
   }
 
   function applyPhoneLayout() {
@@ -73,6 +98,10 @@ const page = document.body.dataset.page;
         return { action: name, password: args[0], transactionId: args[1], update: args[2] || {} };
       case 'adminMarkRoomUnoccupied':
         return { action: name, password: args[0], rentalPlace: args[1], roomNumber: args[2] };
+      case 'adminResolveRoomRequest':
+        return { action: name, password: args[0], requestId: args[1], decision: args[2] };
+      case 'adminAddWifiLicense':
+        return { action: name, password: args[0], form: args[1] || {} };
       default:
         return { action: name };
     }
@@ -124,6 +153,7 @@ const page = document.body.dataset.page;
   }
 
   async function initUserDashboard() {
+    initRenterSpreadsheetLink();
     const auth = readSession('renterAuth');
     if (!auth) {
       showContinue('Session needed', 'Please sign in again to view your renter dashboard.', 'Back to Login', 'user-login');
@@ -174,6 +204,7 @@ const page = document.body.dataset.page;
       state.adminData = await serverCall('getAdminData', password);
       renderAdminDashboard();
       bindBillingForm(password);
+      bindWifiLicenseForm(password);
     } catch (error) {
       sessionStorage.removeItem('adminPassword');
       showContinue('Admin session expired', 'Please enter the admin password again.', 'Back to Admin Login', 'admin-login');
@@ -192,12 +223,50 @@ const page = document.body.dataset.page;
     document.getElementById('userAccountChips').innerHTML = accountChips(user);
     document.getElementById('userDetailsPanel').innerHTML = renderUserDetails(user);
     document.getElementById('userPhoneInput').value = user.phone || '';
+    const sheetLink = document.getElementById('userSpreadsheetLink');
+    if (sheetLink) {
+      setRenterSpreadsheetLink(user.renterSheetUrl);
+    }
     populatePlaceSelect(document.getElementById('requestPlace'), session.rooms || []);
     populateRoomSelect(document.getElementById('requestRoom'), document.getElementById('requestPlace').value, session.rooms || []);
     document.getElementById('requestPlace').onchange = () => {
       populateRoomSelect(document.getElementById('requestRoom'), document.getElementById('requestPlace').value, state.userSession.rooms || []);
     };
     renderUserBills(session.bills || []);
+  }
+
+  function initRenterSpreadsheetLink() {
+    const sheetLink = document.getElementById('userSpreadsheetLink');
+    if (!sheetLink) return;
+
+    sheetLink.addEventListener('click', event => {
+      if (!sheetLink.dataset.href) {
+        event.preventDefault();
+        showToast('Your private spreadsheet is still being prepared. Try signing in again in a moment.');
+      }
+    });
+  }
+
+  function setRenterSpreadsheetLink(url) {
+    const sheetLink = document.getElementById('userSpreadsheetLink');
+    if (!sheetLink) return;
+
+    if (!url) {
+      sheetLink.removeAttribute('target');
+      sheetLink.removeAttribute('rel');
+      sheetLink.removeAttribute('href');
+      delete sheetLink.dataset.href;
+      sheetLink.setAttribute('aria-disabled', 'true');
+      sheetLink.classList.add('disabled');
+      return;
+    }
+
+    sheetLink.href = url;
+    sheetLink.dataset.href = url;
+    sheetLink.target = '_blank';
+    sheetLink.rel = 'noopener';
+    sheetLink.setAttribute('aria-disabled', 'false');
+    sheetLink.classList.remove('disabled');
   }
 
   function bindRenterSelfService(auth) {
@@ -245,8 +314,30 @@ const page = document.body.dataset.page;
     populateBillingPlaces();
     renderAdminBills(state.adminData.bills || []);
     renderAdminRequests(state.adminData.requests || []);
+    renderWifiLicenses(state.adminData.wifiLicenses || []);
     setTodayDefaults();
     populateBillingAmounts();
+  }
+
+  function bindWifiLicenseForm(password) {
+    const form = document.getElementById('wifiLicenseForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const values = Object.fromEntries(new FormData(event.currentTarget).entries());
+      try {
+        setBusy(event.submitter, true);
+        state.adminData = await serverCall('adminAddWifiLicense', password, values);
+        event.currentTarget.reset();
+        renderAdminDashboard();
+        showToast('WiFi license saved.');
+      } catch (error) {
+        showToast(error.message || 'Unable to save WiFi license.');
+      } finally {
+        setBusy(event.submitter, false);
+      }
+    });
   }
 
   function bindBillingForm(password) {
@@ -264,10 +355,11 @@ const page = document.body.dataset.page;
       event.preventDefault();
       const form = Object.fromEntries(new FormData(event.currentTarget).entries());
       try {
+        assertPositiveBillingTotal(form);
         setBusy(event.submitter, true);
         state.adminData = await serverCall('addBilling', password, form);
-        renderAdminDashboard();
         event.currentTarget.reset();
+        renderAdminDashboard();
         setTodayDefaults();
         populateBillingPlaces();
         populateBillingAmounts();
@@ -278,6 +370,18 @@ const page = document.body.dataset.page;
         setBusy(event.submitter, false);
       }
     });
+  }
+
+  function assertPositiveBillingTotal(form) {
+    const total = moneyValue(form.rent) + moneyValue(form.waterBill) + moneyValue(form.electricityBill);
+    if (total <= 0) {
+      throw new Error('Enter at least one billing amount greater than 0.');
+    }
+  }
+
+  function moneyValue(value) {
+    const amount = Number(value);
+    return Number.isFinite(amount) ? Math.max(0, amount) : 0;
   }
 
   async function saveBillRow(button) {
@@ -406,7 +510,7 @@ const page = document.body.dataset.page;
       return;
     }
 
-    if (!confirm(`Mark ${place} ${roomNumber} as unoccupied?`)) {
+    if (!confirm(`Mark ${place} ${roomNumber} as unoccupied? This will remove the renter from this room.`)) {
       return;
     }
 
@@ -467,6 +571,19 @@ const page = document.body.dataset.page;
     `).join('') : '<tr><td colspan="12">No billing transactions yet.</td></tr>';
   }
 
+  function renderWifiLicenses(records) {
+    const tbody = document.getElementById('wifiLicensesTable');
+    if (!tbody) return;
+
+    tbody.innerHTML = records.length ? records.map(record => `
+      <tr>
+        <td>${escapeHtml(record.wifiConName)}</td>
+        <td>${escapeHtml(record.licenseId)}</td>
+        <td>${escapeHtml(record.createdAt)}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="3">No WiFi license records yet.</td></tr>';
+  }
+
   function renderAdminRequests(requests) {
     const target = document.getElementById('adminRequestsList');
     if (!target) return;
@@ -484,8 +601,37 @@ const page = document.body.dataset.page;
           <div><dt>Message</dt><dd>${escapeHtml(request.message || '-')}</dd></div>
           <div><dt>Date</dt><dd>${escapeHtml(request.createdAt)}</dd></div>
         </dl>
+        ${request.status === 'Pending' ? `
+          <div class="request-actions">
+            <button class="button small primary" type="button" onclick="resolveRoomRequest('${escapeJs(request.requestId)}', 'approve')">Approve</button>
+            <button class="button small ghost" type="button" onclick="resolveRoomRequest('${escapeJs(request.requestId)}', 'reject')">Reject</button>
+          </div>
+        ` : ''}
       </article>
     `).join('') : '<p class="empty-mobile">No room change requests yet.</p>';
+  }
+
+  async function resolveRoomRequest(requestId, decision) {
+    const password = sessionStorage.getItem('adminPassword');
+    const label = decision === 'approve' ? 'approve' : 'reject';
+
+    if (!password) {
+      showContinue('Admin session needed', 'Please enter the admin password again.', 'Back to Admin Login', 'admin-login');
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to ${label} this room change request?`)) {
+      return;
+    }
+
+    try {
+      state.adminData = await serverCall('adminResolveRoomRequest', password, requestId, decision);
+      state.publicData = await serverCall('getPublicData');
+      renderAdminDashboard();
+      showToast(`Room request ${decision === 'approve' ? 'approved' : 'rejected'}.`);
+    } catch (error) {
+      showToast(error.message || 'Unable to update request.');
+    }
   }
 
   function accountChips(user) {
@@ -499,6 +645,7 @@ const page = document.body.dataset.page;
     const details = [
       ['Full Name', user.fullName],
       ['Username', `@${user.username}`],
+      ['Email', user.email || 'Not provided'],
       ['Phone', user.phone || 'Not provided'],
       ['Account Status', user.accountStatus]
     ];
@@ -566,6 +713,7 @@ const page = document.body.dataset.page;
 
   function showContinue(title, message, label, targetPage) {
     const main = document.querySelector('main') || document.body;
+    main.classList.add('continue-stage');
     main.innerHTML = `
       <section class="continue-card">
         <div class="continue-badge">Success</div>

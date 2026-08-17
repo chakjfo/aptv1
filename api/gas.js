@@ -1,4 +1,4 @@
-const DEFAULT_GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwIRygfpHkpFWBFyM4fIzN4w5rpy3OtsUKn11s_bZe6c0QbEWI_E1nESiOzzUmO1W4/exec';
+const DEFAULT_GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzHDulctPGQU0vEwnFQsUH99THumVefPm-L6wlZ8XocW5tQJDvc7sm-FkLbt3E5eUWf/exec';
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -23,7 +23,7 @@ module.exports = async function handler(req, res) {
     const redirectUrl = upstream.headers.get('location');
 
     if (upstream.status >= 300 && upstream.status < 400 && redirectUrl) {
-      upstream = await postToAppsScript(redirectUrl, body);
+      upstream = await fetch(redirectUrl);
     }
 
     const text = await upstream.text();

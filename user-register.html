@@ -25,14 +25,17 @@
         <form id="userRegisterForm" class="form-stack">
           <div class="two-col">
             <label>Full Name<input name="fullName" required></label>
+            <label>Email<input name="email" type="email" required></label>
+          </div>
+          <div class="two-col">
             <label>Phone<input name="phone"></label>
-          </div>
-          <div class="two-col">
             <label>Username<input name="username" required></label>
-            <label>Password<input name="password" type="password" required></label>
           </div>
           <div class="two-col">
+            <label>Password<input name="password" type="password" required></label>
             <label>Rental Place<select name="rentalPlace" id="registerPlace" required></select></label>
+          </div>
+          <div class="form-stack">
             <label>Room Number<select name="roomNumber" id="registerRoom" required></select></label>
           </div>
           <button class="button primary" type="submit">Create Account</button>
